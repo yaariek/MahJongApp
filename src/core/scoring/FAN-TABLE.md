@@ -31,9 +31,9 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
 | 假獨                                                |   1 | needs wait                                         |
 | 獨獨 (單釣)                                         |   2 | needs wait                                         |
 | 平糊                                                |   3 | done                                               |
-| 將眼 (pair is 2/5/8)                                |   1 | ready                                              |
-| 老少 (123 + 789, one suit)                          |   2 | ready                                              |
-| 無字 (no honors)                                    |   1 | ready                                              |
+| 將眼 (pair is 2/5/8)                                |   1 | done                                               |
+| 老少 (123 + 789, one suit)                          |   2 | done                                               |
+| 無字 (no honors)                                    |   1 | done                                               |
 | 無字花 (no honors, no flowers)                      |   5 | ready                                              |
 | 無字花平大平糊                                      |  10 | ready                                              |
 | 海底撈月                                            |  20 | needs flags                                        |

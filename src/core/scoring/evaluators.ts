@@ -267,6 +267,26 @@ const faanZiHak: Evaluator = (p, ctx) => {
   return lines.length > 0 ? lines : null;
 };
 
+// 將眼 — the pair is a 2 / 5 / 8.
+const zeungNgaan: Evaluator = (p) =>
+  [2, 5, 8].includes(rankOf(p.pair.tiles[0]) as number) ? { name: '將眼', fan: 1 } : null;
+
+// 老少 — a suit holding both a 123 順 and a 789 順. One line per suit.
+const louSiu: Evaluator = (p) => {
+  const lines: FanLine[] = [];
+  for (const su of ['m', 'p', 's'] as const) {
+    const starts = sequences(p)
+      .filter((s) => suitOf(s.tiles[0]) === su)
+      .map((s) => rankOf(s.tiles[0]));
+    if (starts.includes(1) && starts.includes(7)) lines.push({ name: '老少', fan: 2 });
+  }
+  return lines.length > 0 ? lines : null;
+};
+
+// 無字 — no 風牌 or 箭牌 anywhere in the hand.
+const mouZi: Evaluator = (p) =>
+  allTiles(p).every((t) => suitOf(t) !== null) ? { name: '無字', fan: 1 } : null;
+
 // 門前清 — fully concealed, won on a discard
 const munCinCing: Evaluator = (p, ctx) =>
   isConcealed(p) && !ctx.selfDraw ? { name: '門前清', fan: 3 } : null;
@@ -296,6 +316,9 @@ export const EVALUATORS: Evaluator[] = [
   lung,
   amHak,
   faanZiHak,
+  zeungNgaan,
+  louSiu,
+  mouZi,
   munCinCing,
   batKauJan,
   ziMo,
