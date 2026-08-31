@@ -87,9 +87,10 @@ describe('scoreHand', () => {
       { name: '對對糊', fan: 30 },
       { name: '五暗刻', fan: 80 },
       { name: '圈風刻', fan: 2 },
+      { name: '五門齊', fan: 10 },
       { name: '不求人', fan: 5 },
     ]);
-    expect(result.fanTotal).toBe(117);
+    expect(result.fanTotal).toBe(127);
   });
 
   describe('暗刻 vs 明刻 — same tiles, different win source', () => {
@@ -396,10 +397,11 @@ describe('scoreHand', () => {
         { name: '門風刻', fan: 2 },
         { name: '客風刻', fan: 1 },
         { name: '客風刻', fan: 1 },
+        { name: '缺一門', fan: 5 },
         { name: '將眼', fan: 1 },
         { name: '門前清', fan: 3 },
       ]);
-      expect(result.fanTotal).toBe(150);
+      expect(result.fanTotal).toBe(155);
     });
 
     it('scores 小四喜 — three wind 刻 + a wind pair', () => {
@@ -436,9 +438,10 @@ describe('scoreHand', () => {
         { name: '圈風刻', fan: 2 },
         { name: '門風刻', fan: 2 },
         { name: '客風刻', fan: 1 },
+        { name: '缺一門', fan: 5 },
         { name: '門前清', fan: 3 },
       ]);
-      expect(result.fanTotal).toBe(78);
+      expect(result.fanTotal).toBe(83);
     });
 
     it('scores 大三風 — three wind 刻 with a non-wind pair', () => {
@@ -1099,9 +1102,10 @@ describe('scoreHand', () => {
         { name: '三暗刻', fan: 10 },
         { name: '圈風刻', fan: 2 },
         { name: '中刻', fan: 2 },
+        { name: '五門齊', fan: 10 },
         { name: '門前清', fan: 3 },
       ]);
-      expect(result.fanTotal).toBe(47);
+      expect(result.fanTotal).toBe(57);
     });
   });
 
@@ -1372,6 +1376,87 @@ describe('scoreHand', () => {
         { name: '門前清', fan: 3 },
       ]);
       expect(result.fanTotal).toBe(25);
+    });
+  });
+
+  describe('五門齊 / 缺一門', () => {
+    it('scores 五門齊 — 萬 筒 條 風 箭 all present', () => {
+      // 順 m1m2m3 p1p2p3 | 刻 s9 wS dR | 對 s5 — win on the discarded m3.
+      const hand: Hand = {
+        concealed: [
+          'm1',
+          'm2',
+          'p1',
+          'p2',
+          'p3',
+          's9',
+          's9',
+          's9',
+          'wS',
+          'wS',
+          'wS',
+          'dR',
+          'dR',
+          'dR',
+          's5',
+          's5',
+        ],
+        winningTile: 'm3',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      // m1m2m3 + p1p2p3 also make a 二相逢.
+      expect(result.lines).toEqual([
+        { name: '二相逢', fan: 2 },
+        { name: '三暗刻', fan: 10 },
+        { name: '門風刻', fan: 2 },
+        { name: '中刻', fan: 2 },
+        { name: '五門齊', fan: 10 },
+        { name: '將眼', fan: 1 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(30);
+    });
+
+    it('scores 缺一門 — exactly one of 萬/筒/條 missing', () => {
+      // no 條 at all: 順 m2m3m4 m7m8m9 p3p4p5 | 刻 m6 p9 | 對 p8 — win on the discarded m4.
+      const hand: Hand = {
+        concealed: [
+          'm2',
+          'm3',
+          'm6',
+          'm6',
+          'm6',
+          'm7',
+          'm8',
+          'm9',
+          'p3',
+          'p4',
+          'p5',
+          'p9',
+          'p9',
+          'p9',
+          'p8',
+          'p8',
+        ],
+        winningTile: 'm4',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '二暗刻', fan: 3 },
+        { name: '缺一門', fan: 5 },
+        { name: '將眼', fan: 1 },
+        { name: '無字', fan: 1 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(13);
     });
   });
 

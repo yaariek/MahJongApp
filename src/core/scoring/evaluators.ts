@@ -318,6 +318,26 @@ const faanZiHak: Evaluator = (p, ctx) => {
   return lines.length > 0 ? lines : null;
 };
 
+// 五門齊 — 萬 + 筒 + 條 + 風牌 + 箭牌 all present somewhere in the hand.
+const ngMunChai: Evaluator = (p) => {
+  const t = allTiles(p);
+  const ok =
+    t.some((x) => suitOf(x) === 'm') &&
+    t.some((x) => suitOf(x) === 'p') &&
+    t.some((x) => suitOf(x) === 's') &&
+    t.some(isWindTile) &&
+    t.some(isDragonTile);
+  return ok ? { name: '五門齊', fan: 10 } : null;
+};
+
+// 缺一門 — exactly one of 萬/筒/條 is entirely absent (a one-suit hand is
+// 清/混一色 instead).
+const kyutJatMun: Evaluator = (p) => {
+  const t = allTiles(p);
+  const present = (['m', 'p', 's'] as const).filter((su) => t.some((x) => suitOf(x) === su));
+  return present.length === 2 ? { name: '缺一門', fan: 5 } : null;
+};
+
 // 將眼 — the pair is a 2 / 5 / 8.
 const zeungNgaan: Evaluator = (p) =>
   [2, 5, 8].includes(rankOf(p.pair.tiles[0]) as number) ? { name: '將眼', fan: 1 } : null;
@@ -368,6 +388,8 @@ export const EVALUATORS: Evaluator[] = [
   bunGou,
   amHak,
   faanZiHak,
+  ngMunChai,
+  kyutJatMun,
   zeungNgaan,
   louSiu,
   mouZi,

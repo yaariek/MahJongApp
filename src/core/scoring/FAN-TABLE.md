@@ -68,8 +68,8 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
 | 暗龍                                                |  20 | done                                                          |
 | 明雜龍 (mixed-suit 1-9 run)                         |   8 | done (one leg per suit — 三色)                                |
 | 暗雜龍                                              |  15 | done                                                          |
-| 五門齊 (m + p + s + wind + dragon)                  |  10 | ready                                                         |
-| 缺一門 (one of m/p/s missing)                       |   5 | ready                                                         |
+| 五門齊 (m + p + s + wind + dragon)                  |  10 | done                                                          |
+| 缺一門 (one of m/p/s missing)                       |   5 | done                                                          |
 | 混一色 (one suit + honors)                          |  30 | done                                                          |
 | 清一色 (one suit, no honors)                        |  80 | done                                                          |
 | 對對糊                                              |  30 | done                                                          |
