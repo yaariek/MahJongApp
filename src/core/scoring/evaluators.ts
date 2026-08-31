@@ -69,6 +69,27 @@ const wuJatSik: Evaluator = (p) => {
   return hasHonor ? { name: '混一色', fan: 30 } : { name: '清一色', fan: 80 };
 };
 
+const isTerminal = (t: PlayingTileId) => rankOf(t) === 1 || rankOf(t) === 9;
+const isTerminalOrHonor = (t: PlayingTileId) => rankOf(t) === null || isTerminal(t);
+
+// 帶么九 — every set and the pair carries a 1/9 or a 字牌.
+//   清么 20→80: every set a 刻/槓 of a terminal, no 字, no 順.
+//   全帶么 15: every set/pair carries a plain terminal, no 字, at least one 順.
+//   混么 30: same but 字牌 are involved, at least one 順.
+const wanJiu: Evaluator = (p) => {
+  const everyGroupQualifies =
+    p.sets.every((s) => s.tiles.some(isTerminalOrHonor)) && p.pair.tiles.some(isTerminalOrHonor);
+  if (!everyGroupQualifies) return null;
+
+  const tiles = allTiles(p);
+  const anyHonor = tiles.some((t) => rankOf(t) === null);
+  const anySequence = p.sets.some((s) => s.kind === 'chi');
+
+  if (!anyHonor && !anySequence && tiles.every(isTerminal)) return { name: '清么', fan: 80 };
+  if (!anySequence) return null;
+  return anyHonor ? { name: '混么', fan: 30 } : { name: '全帶么', fan: 15 };
+};
+
 // 三元 — 小三元: two 龍牌 刻/槓 + the pair is the third 龍. 大三元: all three as 刻.
 const saamJyun: Evaluator = (p) => {
   const dragonKe = triplets(p).filter((s) => isDragonTile(s.tiles[0])).length;
@@ -266,6 +287,7 @@ export const EVALUATORS: Evaluator[] = [
   pingWu,
   deoiDeoiWu,
   wuJatSik,
+  wanJiu,
   saamJyun,
   seiHei,
   hingDai,

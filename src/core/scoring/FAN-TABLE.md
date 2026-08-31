@@ -89,10 +89,10 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
 | 嚦咕嚦咕                                            |  40 | special hand                                       |
 | 一台花 (4 plants or 4 seasons)                      |  10 | ready                                              |
 | 兩台花 (4 plants and 4 seasons)                     |  30 | ready                                              |
-| 混么 (terminal/honor in every set + pair, has a 順) |  30 | ready                                              |
+| 混么 (terminal/honor in every set + pair, has a 順) |  30 | done                                               |
 | 全帶混么                                            |  10 | ready (needs def confirmed vs 混么)                |
-| 全帶么                                              |  15 | ready                                              |
-| 清么 (terminal in every set, no honors)             |  80 | ready                                              |
+| 全帶么                                              |  15 | done                                               |
+| 清么 (terminal in every set, no honors)             |  80 | done                                               |
 | 人糊                                                |  80 | needs flags                                        |
 | 天糊                                                | 100 | needs flags                                        |
 | 地糊                                                |  90 | needs flags                                        |
