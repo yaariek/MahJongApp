@@ -102,13 +102,14 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
 1. **Wind 刻 stacking** — a wind 刻 that is BOTH the round wind and the seat wind
    scores **圈風刻 + 門風刻 = 4**. (Implemented.)
 2. **雞糊** — "胡出時（不計莊前）只得一番": the hand's own patterns total exactly
-   **1 番** (excluding 連莊/拉莊). Such a hand scores 雞糊 = 10. _Open: does the 10
-   replace that 1 番 or add to it? Assumed **replace** pending confirmation._
+   **1 番** (excluding 連莊/拉莊). Such a hand scores 雞糊 = 10, **replacing** that
+   1 番. (Not yet implemented — needs a finalize pass in `scoreHand`.)
 3. **正花** — flower number == seat number (E=1, S=2, W=3, N=4), matched
-   separately for the plant set and the season set. **爛花** — a flower whose
-   number is not the seat's. _Open: is 正花 = 2 per matching flower or per hand?
-   Interaction with 一台花 / 兩台花?_
-4. **兄弟** — two 刻子 of the same number in different suits (2 番: 二兄弟 3).
+   separately for the plant set and the season set, **2 番 per matching flower**.
+   **爛花** — a flower whose number is not the seat's, **1 番 each**. **無花** —
+   held zero flowers. (Not yet implemented — needs `hand.flowers` + seat number
+   threaded into scoring; evaluators currently only see the partition.)
+4. **兄弟** — two 刻子 of the same number in different suits (二兄弟 3).
    **小三兄弟** — 二兄弟 plus the pair is that same number in the third suit (10).
    **大三兄弟** — the same number as a 刻 in all three suits (15).
    **姊妹** — two 刻子 of consecutive numbers in the same suit.
@@ -117,9 +118,13 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
    **四歸一** — all four copies of one tile used: 3 in a 刻 + 1 in a 順 (5).
    **四歸二** — all four copies: 2 as the pair + 2 in 順子 (10).
    **四歸四** — all four copies, each in a 順子 (20).
-5. **間間糊** — 自摸 + 門前 + 對對糊 = 100. _Open: replace or stack with 對對糊 /
-   不求人?_
+5. **間間糊** — 自摸 + 門前 + 對對糊 = 100, **replacing** 對對糊 + 不求人. (Not yet
+   implemented — same finalize pass as 雞糊.)
+6. **般高** — two identical 順 (same suit + ranks): 一般高 3 / 三般高 15 / 四般高 30
+   for 2 / 3 / 4 copies. **相逢** — the same 順 rank in different suits: 二相逢 2 /
+   三相逢 10 for 2 / 3 suits. **四同順** — four 順 of one rank in any mix of suits
+   (20); when it applies you do NOT also count 三相逢 / 一般高 / 三般高 for that
+   rank. (Implemented.)
 
-Still to confirm before implementing: the 般高 / 相逢 / 同順 triad (how the three
-names divide up 二色/三色/duplicate 順), 全求人 / 半求人, 全帶混么 vs 混么, and the
-replace-vs-stack questions in 2 / 3 / 5 above.
+Still to confirm: 全求人 / 半求人 (what is 半求人?), 全帶混么 vs 混么, 無字花 /
+無字花平大平糊 definitions.
