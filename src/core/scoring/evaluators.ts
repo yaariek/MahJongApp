@@ -69,6 +69,25 @@ const wuJatSik: Evaluator = (p) => {
   return hasHonor ? { name: '混一色', fan: 30 } : { name: '清一色', fan: 80 };
 };
 
+// 三元 — 小三元: two 龍牌 刻/槓 + the pair is the third 龍. 大三元: all three as 刻.
+const saamJyun: Evaluator = (p) => {
+  const dragonKe = triplets(p).filter((s) => isDragonTile(s.tiles[0])).length;
+  if (dragonKe === 3) return { name: '大三元', fan: 40 };
+  if (dragonKe === 2 && isDragonTile(p.pair.tiles[0])) return { name: '小三元', fan: 20 };
+  return null;
+};
+
+// 四喜 — by wind 刻/槓 count. 大四喜: four. 小四喜: three + a wind pair. 大三風:
+// three + a non-wind pair. 小三風: two + a wind pair.
+const seiHei: Evaluator = (p) => {
+  const windKe = triplets(p).filter((s) => isWindTile(s.tiles[0])).length;
+  const windPair = isWindTile(p.pair.tiles[0]);
+  if (windKe === 4) return { name: '大四喜', fan: 80 };
+  if (windKe === 3) return windPair ? { name: '小四喜', fan: 60 } : { name: '大三風', fan: 30 };
+  if (windKe === 2 && windPair) return { name: '小三風', fan: 15 };
+  return null;
+};
+
 // 二/三/四/五暗刻 — mutually exclusive, only the highest tier fires.
 const amHak: Evaluator = (p) => {
   const n = concealedTripletCount(p);
@@ -125,6 +144,8 @@ export const EVALUATORS: Evaluator[] = [
   pingWu,
   deoiDeoiWu,
   wuJatSik,
+  saamJyun,
+  seiHei,
   amHak,
   faanZiHak,
   munCinCing,

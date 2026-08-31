@@ -123,13 +123,15 @@ describe('scoreHand', () => {
 
       const result = scoreHand(hand, baseContext);
 
+      // The three 龍牌 刻 are also 大三元 (dW completed by the winning discard).
       expect(result.lines).toEqual([
+        { name: '大三元', fan: 40 },
         { name: '二暗刻', fan: 3 },
         { name: '中刻', fan: 2 },
         { name: '發刻', fan: 2 },
         { name: '白刻', fan: 2 },
       ]);
-      expect(result.fanTotal).toBe(9);
+      expect(result.fanTotal).toBe(49);
     });
 
     it('tells 圈風刻 / 門風刻 / 客風刻 apart for the seat and round wind', () => {
@@ -143,13 +145,15 @@ describe('scoreHand', () => {
 
       const result = scoreHand(hand, { ...baseContext, seatWind: 'S', roundWind: 'E' });
 
+      // Three wind 刻 with a non-wind pair is also 大三風.
       expect(result.lines).toEqual([
+        { name: '大三風', fan: 30 },
         { name: '三暗刻', fan: 10 },
         { name: '圈風刻', fan: 2 },
         { name: '門風刻', fan: 2 },
         { name: '客風刻', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(15);
+      expect(result.fanTotal).toBe(45);
     });
   });
 
@@ -245,6 +249,243 @@ describe('scoreHand', () => {
       { name: '門風刻', fan: 2 },
     ]);
     expect(result.fanTotal).toBe(4);
+  });
+
+  describe('三元 / 四喜', () => {
+    it('scores 大三元 (+ 對對糊 + 四暗刻) — three 龍牌 刻, one downgraded by the win', () => {
+      // 刻 dR dG dW m2 s7 | 對 p5 — win on the discarded 3rd m2, so that 刻 is 明.
+      const hand: Hand = {
+        concealed: [
+          'dR',
+          'dR',
+          'dR',
+          'dG',
+          'dG',
+          'dG',
+          'dW',
+          'dW',
+          'dW',
+          'm2',
+          'm2',
+          's7',
+          's7',
+          's7',
+          'p5',
+          'p5',
+        ],
+        winningTile: 'm2',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '對對糊', fan: 30 },
+        { name: '大三元', fan: 40 },
+        { name: '四暗刻', fan: 30 },
+        { name: '中刻', fan: 2 },
+        { name: '發刻', fan: 2 },
+        { name: '白刻', fan: 2 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(109);
+    });
+
+    it('scores 小三元 — two 龍牌 刻 + a 龍牌 pair', () => {
+      // 刻 dR dG | 對 dW | 順 m1m2m3 p1p2p3 s1s2s3 — win on the discarded s3.
+      const hand: Hand = {
+        concealed: [
+          'dR',
+          'dR',
+          'dR',
+          'dG',
+          'dG',
+          'dG',
+          'dW',
+          'dW',
+          'm1',
+          'm2',
+          'm3',
+          'p1',
+          'p2',
+          'p3',
+          's1',
+          's2',
+        ],
+        winningTile: 's3',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '小三元', fan: 20 },
+        { name: '二暗刻', fan: 3 },
+        { name: '中刻', fan: 2 },
+        { name: '發刻', fan: 2 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(30);
+    });
+
+    it('scores 大四喜 (+ 對對糊 + 四暗刻) — four wind 刻', () => {
+      // 刻 wE wS wW wN m5 | 對 p2 — win on the discarded 3rd m5. Seat S, round E.
+      const hand: Hand = {
+        concealed: [
+          'wE',
+          'wE',
+          'wE',
+          'wS',
+          'wS',
+          'wS',
+          'wW',
+          'wW',
+          'wW',
+          'wN',
+          'wN',
+          'wN',
+          'm5',
+          'm5',
+          'p2',
+          'p2',
+        ],
+        winningTile: 'm5',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '對對糊', fan: 30 },
+        { name: '大四喜', fan: 80 },
+        { name: '四暗刻', fan: 30 },
+        { name: '圈風刻', fan: 2 },
+        { name: '門風刻', fan: 2 },
+        { name: '客風刻', fan: 1 },
+        { name: '客風刻', fan: 1 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(149);
+    });
+
+    it('scores 小四喜 — three wind 刻 + a wind pair', () => {
+      // 刻 wE wS wW | 對 wN | 順 m1m2m3 p1p2p3 — win on the discarded p3.
+      const hand: Hand = {
+        concealed: [
+          'wE',
+          'wE',
+          'wE',
+          'wS',
+          'wS',
+          'wS',
+          'wW',
+          'wW',
+          'wW',
+          'wN',
+          'wN',
+          'm1',
+          'm2',
+          'm3',
+          'p1',
+          'p2',
+        ],
+        winningTile: 'p3',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '小四喜', fan: 60 },
+        { name: '三暗刻', fan: 10 },
+        { name: '圈風刻', fan: 2 },
+        { name: '門風刻', fan: 2 },
+        { name: '客風刻', fan: 1 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(78);
+    });
+
+    it('scores 大三風 — three wind 刻 with a non-wind pair', () => {
+      // 刻 wE wS wW m1 | 順 p1p2p3 | 對 s5 — win on the discarded p3.
+      const hand: Hand = {
+        concealed: [
+          'wE',
+          'wE',
+          'wE',
+          'wS',
+          'wS',
+          'wS',
+          'wW',
+          'wW',
+          'wW',
+          'm1',
+          'm1',
+          'm1',
+          'p1',
+          'p2',
+          's5',
+          's5',
+        ],
+        winningTile: 'p3',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '大三風', fan: 30 },
+        { name: '四暗刻', fan: 30 },
+        { name: '圈風刻', fan: 2 },
+        { name: '門風刻', fan: 2 },
+        { name: '客風刻', fan: 1 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(68);
+    });
+
+    it('scores 小三風 — two wind 刻 + a wind pair', () => {
+      // 刻 wE wS | 對 wW | 順 m1m2m3 p1p2p3 s1s2s3 — win on the discarded s3.
+      const hand: Hand = {
+        concealed: [
+          'wE',
+          'wE',
+          'wE',
+          'wS',
+          'wS',
+          'wS',
+          'wW',
+          'wW',
+          'm1',
+          'm2',
+          'm3',
+          'p1',
+          'p2',
+          'p3',
+          's1',
+          's2',
+        ],
+        winningTile: 's3',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '小三風', fan: 15 },
+        { name: '二暗刻', fan: 3 },
+        { name: '圈風刻', fan: 2 },
+        { name: '門風刻', fan: 2 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(25);
+    });
   });
 
   it('throws when the tiles cannot form 5 sets + a pair', () => {

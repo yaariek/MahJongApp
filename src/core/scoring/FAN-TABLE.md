@@ -77,12 +77,12 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
 | 半求人                                              |   8 | ready (needs def confirmed)                        |
 | 七只內                                              |  20 | needs turn count                                   |
 | 十只內                                              |  10 | needs turn count                                   |
-| 小三元 (2 dragon 刻 + dragon pair)                  |  20 | ready                                              |
-| 大三元 (3 dragon 刻)                                |  40 | ready                                              |
-| 小三風 (2 wind 刻 + wind pair)                      |  15 | ready                                              |
-| 大三風 (3 wind 刻)                                  |  30 | ready                                              |
-| 小四喜 (3 wind 刻 + wind pair)                      |  60 | ready                                              |
-| 大四喜 (4 wind 刻)                                  |  80 | ready                                              |
+| 小三元 (2 dragon 刻 + dragon pair)                  |  20 | done                                               |
+| 大三元 (3 dragon 刻)                                |  40 | done                                               |
+| 小三風 (2 wind 刻 + wind pair)                      |  15 | done                                               |
+| 大三風 (3 wind 刻)                                  |  30 | done                                               |
+| 小四喜 (3 wind 刻 + wind pair)                      |  60 | done                                               |
+| 大四喜 (4 wind 刻)                                  |  80 | done                                               |
 | 十三么                                              |  80 | special hand                                       |
 | 十六不搭 (九唔搭)                                   |  40 | special hand                                       |
 | 間間糊                                              | 100 | ready (needs definition confirmed)                 |
