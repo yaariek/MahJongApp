@@ -88,6 +88,61 @@ const seiHei: Evaluator = (p) => {
   return null;
 };
 
+// 兄弟 — 刻子 of the same rank across suits. 大三兄弟: all three suits. 小三兄弟:
+// two suits + the pair is that rank in the third suit. 二兄弟: two suits, other
+// pair. One line per qualifying rank.
+const hingDai: Evaluator = (p) => {
+  const suitsByRank = new Map<number, Set<Suit>>();
+  for (const s of triplets(p)) {
+    const r = rankOf(s.tiles[0]);
+    const su = suitOf(s.tiles[0]);
+    if (r === null || su === null) continue;
+    const seen = suitsByRank.get(r) ?? new Set<Suit>();
+    seen.add(su);
+    suitsByRank.set(r, seen);
+  }
+  const pairRank = rankOf(p.pair.tiles[0]);
+  const pairSuit = suitOf(p.pair.tiles[0]);
+  const lines: FanLine[] = [];
+  for (const [r, suits] of suitsByRank) {
+    if (suits.size === 3) {
+      lines.push({ name: '大三兄弟', fan: 15 });
+    } else if (suits.size === 2) {
+      const pairCompletes = pairRank === r && pairSuit !== null && !suits.has(pairSuit);
+      lines.push(pairCompletes ? { name: '小三兄弟', fan: 10 } : { name: '二兄弟', fan: 3 });
+    }
+  }
+  return lines.length > 0 ? lines : null;
+};
+
+// 姊妹 — 刻子 of consecutive ranks in the SAME suit. 大三姊妹: three in a row.
+// 小三姊妹: two in a row + the pair (same suit) extends the run. One line per suit.
+const ziMui: Evaluator = (p) => {
+  const pairRank = rankOf(p.pair.tiles[0]);
+  const pairSuit = suitOf(p.pair.tiles[0]);
+  const lines: FanLine[] = [];
+  for (const su of ['m', 'p', 's'] as const) {
+    const ranks = new Set(
+      triplets(p)
+        .filter((s) => suitOf(s.tiles[0]) === su)
+        .map((s) => rankOf(s.tiles[0]) as number),
+    );
+    for (let r = 1; r <= 7; r++) {
+      if (ranks.has(r) && ranks.has(r + 1) && ranks.has(r + 2)) {
+        lines.push({ name: '大三姊妹', fan: 15 });
+      }
+    }
+    if (pairSuit === su && pairRank !== null) {
+      for (let r = 1; r <= 8; r++) {
+        if (ranks.has(r) && ranks.has(r + 1) && (pairRank === r - 1 || pairRank === r + 2)) {
+          lines.push({ name: '小三姊妹', fan: 8 });
+        }
+      }
+    }
+  }
+  return lines.length > 0 ? lines : null;
+};
+
 // 二/三/四/五暗刻 — mutually exclusive, only the highest tier fires.
 const amHak: Evaluator = (p) => {
   const n = concealedTripletCount(p);
@@ -146,6 +201,8 @@ export const EVALUATORS: Evaluator[] = [
   wuJatSik,
   saamJyun,
   seiHei,
+  hingDai,
+  ziMui,
   amHak,
   faanZiHak,
   munCinCing,

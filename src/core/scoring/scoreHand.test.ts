@@ -488,6 +488,188 @@ describe('scoreHand', () => {
     });
   });
 
+  describe('兄弟 / 姊妹', () => {
+    it('scores 二兄弟 — same-rank 刻 in two suits, other pair', () => {
+      // 刻 m5 p5 | 順 m1m2m3 p1p2p3 s1s2s3 | 對 s7 — win on the discarded s3.
+      const hand: Hand = {
+        concealed: [
+          'm5',
+          'm5',
+          'm5',
+          'p5',
+          'p5',
+          'p5',
+          'm1',
+          'm2',
+          'm3',
+          'p1',
+          'p2',
+          'p3',
+          's1',
+          's2',
+          's7',
+          's7',
+        ],
+        winningTile: 's3',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '二兄弟', fan: 3 },
+        { name: '二暗刻', fan: 3 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(9);
+    });
+
+    it('scores 小三兄弟 — same-rank 刻 in two suits + a same-rank pair in the third', () => {
+      // 刻 m5 p5 | 對 s5 | 順 m1m2m3 p1p2p3 s1s2s3 — win on the discarded s3.
+      const hand: Hand = {
+        concealed: [
+          'm5',
+          'm5',
+          'm5',
+          'p5',
+          'p5',
+          'p5',
+          's5',
+          's5',
+          'm1',
+          'm2',
+          'm3',
+          'p1',
+          'p2',
+          'p3',
+          's1',
+          's2',
+        ],
+        winningTile: 's3',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '小三兄弟', fan: 10 },
+        { name: '二暗刻', fan: 3 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(16);
+    });
+
+    it('scores 大三兄弟 — same-rank 刻 in all three suits', () => {
+      // 刻 m5 p5 s5 | 順 m1m2m3 p1p2p3 | 對 s7 — win on the discarded p3.
+      const hand: Hand = {
+        concealed: [
+          'm5',
+          'm5',
+          'm5',
+          'p5',
+          'p5',
+          'p5',
+          's5',
+          's5',
+          's5',
+          'm1',
+          'm2',
+          'm3',
+          'p1',
+          'p2',
+          's7',
+          's7',
+        ],
+        winningTile: 'p3',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '大三兄弟', fan: 15 },
+        { name: '三暗刻', fan: 10 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(28);
+    });
+
+    it('scores 大三姊妹 — three consecutive-rank 刻 in one suit', () => {
+      // 刻 m4 m5 m6 | 順 p1p2p3 s1s2s3 | 對 s7 — win on the discarded s3.
+      const hand: Hand = {
+        concealed: [
+          'm4',
+          'm4',
+          'm4',
+          'm5',
+          'm5',
+          'm5',
+          'm6',
+          'm6',
+          'm6',
+          'p1',
+          'p2',
+          'p3',
+          's1',
+          's2',
+          's7',
+          's7',
+        ],
+        winningTile: 's3',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '大三姊妹', fan: 15 },
+        { name: '三暗刻', fan: 10 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(28);
+    });
+
+    it('scores 小三姊妹 — two consecutive-rank 刻 + the pair extends the run', () => {
+      // 刻 m4 m5 | 對 m6 | 順 p1p2p3 s1s2s3 s7s8s9 — win on the discarded s9.
+      const hand: Hand = {
+        concealed: [
+          'm4',
+          'm4',
+          'm4',
+          'm5',
+          'm5',
+          'm5',
+          'm6',
+          'm6',
+          'p1',
+          'p2',
+          'p3',
+          's1',
+          's2',
+          's3',
+          's7',
+          's8',
+        ],
+        winningTile: 's9',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '小三姊妹', fan: 8 },
+        { name: '二暗刻', fan: 3 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(14);
+    });
+  });
+
   it('throws when the tiles cannot form 5 sets + a pair', () => {
     const hand: Hand = {
       concealed: ['m1', 'm1', 'm3', 'p2', 'p4', 'p6', 's1', 's3', 's5', 's7', 's9', 'wE', 'wS'],

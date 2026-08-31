@@ -56,11 +56,11 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
 | 三相逢 (三色同順)                                   |  10 | ready                                              |
 | 四同順                                              |  20 | ready                                              |
 | 五同順                                              |  40 | ready                                              |
-| 二兄弟 (same-rank 刻, 2 suits)                      |   3 | ready                                              |
-| 小三兄弟 (三色同刻, 2 concealed)                    |  10 | ready (needs exact def confirmed)                  |
-| 大三兄弟 (三色同刻)                                 |  15 | ready                                              |
-| 小三姊妹                                            |   8 | ready (needs def confirmed)                        |
-| 大三姊妹                                            |  15 | ready (needs def confirmed)                        |
+| 二兄弟 (same-rank 刻, 2 suits)                      |   3 | done                                               |
+| 小三兄弟 (三色同刻, 2 concealed)                    |  10 | done                                               |
+| 大三兄弟 (三色同刻)                                 |  15 | done                                               |
+| 小三姊妹                                            |   8 | done                                               |
+| 大三姊妹                                            |  15 | done                                               |
 | 四歸一                                              |   5 | ready (needs def confirmed)                        |
 | 四歸二                                              |  10 | ready                                              |
 | 四歸四                                              |  20 | ready                                              |
