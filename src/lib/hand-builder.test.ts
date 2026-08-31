@@ -51,11 +51,12 @@ describe('buildHand', () => {
     expect(scoreHand(hand, ctx)).toEqual({
       lines: [
         { name: '平糊', fan: 3 },
+        { name: '三相逢', fan: 10 },
         { name: '將眼', fan: 1 },
         { name: '老少', fan: 2 },
         { name: '無字', fan: 1 },
       ],
-      fanTotal: 7,
+      fanTotal: 17,
     });
   });
 

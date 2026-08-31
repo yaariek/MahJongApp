@@ -167,21 +167,34 @@ const ziMui: Evaluator = (p) => {
 // 四歸n — all four copies of one suited tile, spread across the hand.
 //   四歸一: 3 in a 刻 + 1 in a 順.
 //   四歸二: 2 as the pair + 2 in 順子.
-//   四歸四: all four in 順子.
+//   四歸四: all four in 順子 of at least two distinct shapes (four copies of the
+//           same 順 is 般高, not 四歸).
 // One line per qualifying tile. A declared 槓 (all four in one set) does not count.
 const seiGwai: Evaluator = (p) => {
-  type Spread = { pon: number; chi: number; kan: number; pair: number };
+  type Spread = { pon: number; chi: number; kan: number; pair: number; chiShapes: Set<string> };
   const spread = new Map<PlayingTileId, Spread>();
-  const bump = (t: PlayingTileId, key: keyof Spread) => {
-    const s = spread.get(t) ?? { pon: 0, chi: 0, kan: 0, pair: 0 };
-    s[key] += 1;
-    spread.set(t, s);
+  const of = (t: PlayingTileId) => {
+    let s = spread.get(t);
+    if (!s) {
+      s = { pon: 0, chi: 0, kan: 0, pair: 0, chiShapes: new Set() };
+      spread.set(t, s);
+    }
+    return s;
   };
   for (const set of p.sets) {
-    const key = set.kind === 'chi' ? 'chi' : set.kind === 'kan' ? 'kan' : 'pon';
-    for (const t of set.tiles) bump(t, key);
+    if (set.kind === 'chi') {
+      const shape = set.tiles.join('');
+      for (const t of set.tiles) {
+        const s = of(t);
+        s.chi += 1;
+        s.chiShapes.add(shape);
+      }
+    } else {
+      const key = set.kind === 'kan' ? 'kan' : 'pon';
+      for (const t of set.tiles) of(t)[key] += 1;
+    }
   }
-  for (const t of p.pair.tiles) bump(t, 'pair');
+  for (const t of p.pair.tiles) of(t).pair += 1;
 
   const lines: FanLine[] = [];
   for (const [t, s] of spread) {
@@ -189,7 +202,7 @@ const seiGwai: Evaluator = (p) => {
     if (s.pon + s.chi + s.kan + s.pair !== 4 || s.kan > 0) continue;
     if (s.pon === 3 && s.chi === 1) lines.push({ name: '四歸一', fan: 5 });
     else if (s.pair === 2 && s.chi === 2) lines.push({ name: '四歸二', fan: 10 });
-    else if (s.chi === 4) lines.push({ name: '四歸四', fan: 20 });
+    else if (s.chi === 4 && s.chiShapes.size >= 2) lines.push({ name: '四歸四', fan: 20 });
   }
   return lines.length > 0 ? lines : null;
 };
@@ -229,6 +242,44 @@ const lung: Evaluator = (p) => {
     }
   }
   return null;
+};
+
+// 般高 / 相逢 / 同順 — repeated 順子, grouped by their starting rank.
+//   般高: identical 順 in the SAME suit — 一般高 (2) 3 / 三般高 (3) 15 / 四般高 (4) 30.
+//   相逢: the same 順 rank across different suits — 二相逢 (2) 2 / 三相逢 (3) 10.
+//   四同順 20: four 順 of one rank in any mix of suits — supersedes 般高/相逢 for
+//   that rank (house rule). One line group per starting rank.
+const bunGou: Evaluator = (p) => {
+  const bySuitByRank = new Map<number, Map<Suit, number>>();
+  for (const s of sequences(p)) {
+    const r = rankOf(s.tiles[0]);
+    const su = suitOf(s.tiles[0]);
+    if (r === null || su === null) continue;
+    const perSuit = bySuitByRank.get(r) ?? new Map<Suit, number>();
+    perSuit.set(su, (perSuit.get(su) ?? 0) + 1);
+    bySuitByRank.set(r, perSuit);
+  }
+
+  const lines: FanLine[] = [];
+  for (const perSuit of bySuitByRank.values()) {
+    const counts = [...perSuit.values()];
+    const total = counts.reduce((a, b) => a + b, 0);
+    const maxInSuit = Math.max(...counts);
+
+    if (maxInSuit === 4) {
+      lines.push({ name: '四般高', fan: 30 });
+      continue;
+    }
+    if (total === 4) {
+      lines.push({ name: '四同順', fan: 20 });
+      continue;
+    }
+    if (maxInSuit === 3) lines.push({ name: '三般高', fan: 15 });
+    else if (maxInSuit === 2) lines.push({ name: '一般高', fan: 3 });
+    if (perSuit.size === 3) lines.push({ name: '三相逢', fan: 10 });
+    else if (perSuit.size === 2) lines.push({ name: '二相逢', fan: 2 });
+  }
+  return lines.length > 0 ? lines : null;
 };
 
 // 二/三/四/五暗刻 — mutually exclusive, only the highest tier fires.
@@ -314,6 +365,7 @@ export const EVALUATORS: Evaluator[] = [
   ziMui,
   seiGwai,
   lung,
+  bunGou,
   amHak,
   faanZiHak,
   zeungNgaan,
