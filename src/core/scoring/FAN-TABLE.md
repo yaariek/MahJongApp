@@ -64,10 +64,10 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
 | 四歸一                                              |   5 | done                                               |
 | 四歸二                                              |  10 | done                                               |
 | 四歸四                                              |  20 | done                                               |
-| 明龍 (123-456-789 one suit, exposed)                |  10 | ready                                              |
-| 暗龍                                                |  20 | ready                                              |
-| 明雜龍 (mixed-suit 1-9 run)                         |   8 | ready                                              |
-| 暗雜龍                                              |  15 | ready                                              |
+| 明龍 (123-456-789 one suit, exposed)                |  10 | done                                               |
+| 暗龍                                                |  20 | done                                               |
+| 明雜龍 (mixed-suit 1-9 run)                         |   8 | done (one leg per suit — 三色)                     |
+| 暗雜龍                                              |  15 | done                                               |
 | 五門齊 (m + p + s + wind + dragon)                  |  10 | ready                                              |
 | 缺一門 (one of m/p/s missing)                       |   5 | ready                                              |
 | 混一色 (one suit + honors)                          |  30 | done                                               |

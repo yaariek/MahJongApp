@@ -186,14 +186,16 @@ describe('scoreHand', () => {
 
       const result = scoreHand(hand, { ...baseContext, selfDraw: true });
 
-      // All four m9 are used — two as the pair, two in the m7m8m9 順 — so 四歸二.
+      // Also 四歸二 (all four m9 — two in the pair, two in m7m8m9) and 暗龍
+      // (a concealed m1-9 straight).
       expect(result.lines).toEqual([
         { name: '平糊', fan: 3 },
         { name: '清一色', fan: 80 },
         { name: '四歸二', fan: 10 },
+        { name: '暗龍', fan: 20 },
         { name: '不求人', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(98);
+      expect(result.fanTotal).toBe(118);
     });
 
     it('scores 混一色 on a one-suit + 字牌 hand', () => {
@@ -224,14 +226,16 @@ describe('scoreHand', () => {
 
       const result = scoreHand(hand, { ...baseContext, selfDraw: true });
 
+      // The concealed m1m2m3 / m4m5m6 / m7m8m9 is also a 暗龍.
       expect(result.lines).toEqual([
         { name: '混一色', fan: 30 },
+        { name: '暗龍', fan: 20 },
         { name: '二暗刻', fan: 3 },
         { name: '門風刻', fan: 2 },
         { name: '中刻', fan: 2 },
         { name: '不求人', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(42);
+      expect(result.fanTotal).toBe(62);
     });
   });
 
@@ -777,6 +781,150 @@ describe('scoreHand', () => {
         { name: '門前清', fan: 3 },
       ]);
       expect(result.fanTotal).toBe(26);
+    });
+  });
+
+  describe('龍 / 雜龍', () => {
+    it('scores 暗龍 — a concealed 1-9 straight in one suit', () => {
+      // 順 m1m2m3 m4m5m6 m7m8m9 p1p2p3 | 刻 s5 | 對 p7 — self-drawn m6.
+      const hand: Hand = {
+        concealed: [
+          'm1',
+          'm2',
+          'm3',
+          'm4',
+          'm5',
+          'm7',
+          'm8',
+          'm9',
+          'p1',
+          'p2',
+          'p3',
+          's5',
+          's5',
+          's5',
+          'p7',
+          'p7',
+        ],
+        winningTile: 'm6',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, { ...baseContext, selfDraw: true });
+
+      expect(result.lines).toEqual([
+        { name: '暗龍', fan: 20 },
+        { name: '不求人', fan: 5 },
+      ]);
+      expect(result.fanTotal).toBe(25);
+    });
+
+    it('scores 明龍 — the 789 leg completed by the winning discard', () => {
+      // same straight, but won on a discarded m9.
+      const hand: Hand = {
+        concealed: [
+          'm1',
+          'm2',
+          'm3',
+          'm4',
+          'm5',
+          'm6',
+          'm7',
+          'm8',
+          'p1',
+          'p2',
+          'p3',
+          's5',
+          's5',
+          's5',
+          'p7',
+          'p7',
+        ],
+        winningTile: 'm9',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '明龍', fan: 10 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(13);
+    });
+
+    it('scores 暗雜龍 — a concealed 1-9 straight, one leg in each suit', () => {
+      // 順 m1m2m3 (123) p4p5p6 (456) s7s8s9 (789) | 刻 m5 p8 | 對 s3 — self-drawn p6.
+      const hand: Hand = {
+        concealed: [
+          'm1',
+          'm2',
+          'm3',
+          'm5',
+          'm5',
+          'm5',
+          'p4',
+          'p5',
+          'p8',
+          'p8',
+          'p8',
+          's7',
+          's8',
+          's9',
+          's3',
+          's3',
+        ],
+        winningTile: 'p6',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, { ...baseContext, selfDraw: true });
+
+      expect(result.lines).toEqual([
+        { name: '暗雜龍', fan: 15 },
+        { name: '二暗刻', fan: 3 },
+        { name: '不求人', fan: 5 },
+      ]);
+      expect(result.fanTotal).toBe(23);
+    });
+
+    it('scores 明雜龍 — cross-suit straight, 789 leg won by discard', () => {
+      // 順 m1m2m3 (123) p4p5p6 (456) s7s8s9 (789) | 刻 m5 s2 | 對 p1 — win on s9.
+      const hand: Hand = {
+        concealed: [
+          'm1',
+          'm2',
+          'm3',
+          'm5',
+          'm5',
+          'm5',
+          's2',
+          's2',
+          's2',
+          'p4',
+          'p5',
+          'p6',
+          's7',
+          's8',
+          'p1',
+          'p1',
+        ],
+        winningTile: 's9',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '明雜龍', fan: 8 },
+        { name: '二暗刻', fan: 3 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(14);
     });
   });
 

@@ -173,6 +173,43 @@ const seiGwai: Evaluator = (p) => {
   return lines.length > 0 ? lines : null;
 };
 
+// 龍 — a 123 + 456 + 789 straight. 清龍 (one suit): 暗龍 20 if all three 順 are
+// concealed, else 明龍 10. 雜龍 (one leg in each of the three suits): 暗雜龍 15 /
+// 明雜龍 8.
+const lung: Evaluator = (p) => {
+  const seqs = sequences(p);
+
+  const bySuit = new Map<Suit, ParsedSet[]>();
+  for (const s of seqs) {
+    const su = suitOf(s.tiles[0]);
+    if (su === null) continue;
+    const arr = bySuit.get(su) ?? [];
+    arr.push(s);
+    bySuit.set(su, arr);
+  }
+  for (const arr of bySuit.values()) {
+    const runs = new Map<number, ParsedSet>();
+    for (const s of arr) runs.set(rankOf(s.tiles[0]) as number, s);
+    if (runs.has(1) && runs.has(4) && runs.has(7)) {
+      const concealed = [1, 4, 7].every((r) => (runs.get(r) as ParsedSet).concealed);
+      return concealed ? { name: '暗龍', fan: 20 } : { name: '明龍', fan: 10 };
+    }
+  }
+
+  const pick = (r: number) => seqs.find((s) => rankOf(s.tiles[0]) === r);
+  const lo = pick(1);
+  const mid = pick(4);
+  const hi = pick(7);
+  if (lo && mid && hi) {
+    const suits = new Set([lo, mid, hi].map((s) => suitOf(s.tiles[0])));
+    if (suits.size === 3) {
+      const concealed = lo.concealed && mid.concealed && hi.concealed;
+      return concealed ? { name: '暗雜龍', fan: 15 } : { name: '明雜龍', fan: 8 };
+    }
+  }
+  return null;
+};
+
 // 二/三/四/五暗刻 — mutually exclusive, only the highest tier fires.
 const amHak: Evaluator = (p) => {
   const n = concealedTripletCount(p);
@@ -234,6 +271,7 @@ export const EVALUATORS: Evaluator[] = [
   hingDai,
   ziMui,
   seiGwai,
+  lung,
   amHak,
   faanZiHak,
   munCinCing,
