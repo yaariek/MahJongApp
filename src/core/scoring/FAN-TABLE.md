@@ -61,9 +61,9 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
 | 大三兄弟 (三色同刻)                                 |  15 | done                                               |
 | 小三姊妹                                            |   8 | done                                               |
 | 大三姊妹                                            |  15 | done                                               |
-| 四歸一                                              |   5 | ready (needs def confirmed)                        |
-| 四歸二                                              |  10 | ready                                              |
-| 四歸四                                              |  20 | ready                                              |
+| 四歸一                                              |   5 | done                                               |
+| 四歸二                                              |  10 | done                                               |
+| 四歸四                                              |  20 | done                                               |
 | 明龍 (123-456-789 one suit, exposed)                |  10 | ready                                              |
 | 暗龍                                                |  20 | ready                                              |
 | 明雜龍 (mixed-suit 1-9 run)                         |   8 | ready                                              |

@@ -20,7 +20,7 @@
  */
 
 import { isHonor, rankOf, suitOf } from '../tiles/tiles';
-import type { DragonTileId, Suit, WindTileId } from '../tiles/tiles';
+import type { DragonTileId, PlayingTileId, Suit, WindTileId } from '../tiles/tiles';
 import type { Wind } from '../game-state/rotation';
 import type { HandPartition, ParsedSet } from './parse';
 import type { FanLine, HandContext } from './types';
@@ -143,6 +143,36 @@ const ziMui: Evaluator = (p) => {
   return lines.length > 0 ? lines : null;
 };
 
+// 四歸n — all four copies of one suited tile, spread across the hand.
+//   四歸一: 3 in a 刻 + 1 in a 順.
+//   四歸二: 2 as the pair + 2 in 順子.
+//   四歸四: all four in 順子.
+// One line per qualifying tile. A declared 槓 (all four in one set) does not count.
+const seiGwai: Evaluator = (p) => {
+  type Spread = { pon: number; chi: number; kan: number; pair: number };
+  const spread = new Map<PlayingTileId, Spread>();
+  const bump = (t: PlayingTileId, key: keyof Spread) => {
+    const s = spread.get(t) ?? { pon: 0, chi: 0, kan: 0, pair: 0 };
+    s[key] += 1;
+    spread.set(t, s);
+  };
+  for (const set of p.sets) {
+    const key = set.kind === 'chi' ? 'chi' : set.kind === 'kan' ? 'kan' : 'pon';
+    for (const t of set.tiles) bump(t, key);
+  }
+  for (const t of p.pair.tiles) bump(t, 'pair');
+
+  const lines: FanLine[] = [];
+  for (const [t, s] of spread) {
+    if (suitOf(t) === null) continue;
+    if (s.pon + s.chi + s.kan + s.pair !== 4 || s.kan > 0) continue;
+    if (s.pon === 3 && s.chi === 1) lines.push({ name: '四歸一', fan: 5 });
+    else if (s.pair === 2 && s.chi === 2) lines.push({ name: '四歸二', fan: 10 });
+    else if (s.chi === 4) lines.push({ name: '四歸四', fan: 20 });
+  }
+  return lines.length > 0 ? lines : null;
+};
+
 // 二/三/四/五暗刻 — mutually exclusive, only the highest tier fires.
 const amHak: Evaluator = (p) => {
   const n = concealedTripletCount(p);
@@ -203,6 +233,7 @@ export const EVALUATORS: Evaluator[] = [
   seiHei,
   hingDai,
   ziMui,
+  seiGwai,
   amHak,
   faanZiHak,
   munCinCing,

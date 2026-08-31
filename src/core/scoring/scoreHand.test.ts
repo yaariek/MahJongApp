@@ -186,12 +186,14 @@ describe('scoreHand', () => {
 
       const result = scoreHand(hand, { ...baseContext, selfDraw: true });
 
+      // All four m9 are used — two as the pair, two in the m7m8m9 順 — so 四歸二.
       expect(result.lines).toEqual([
         { name: '平糊', fan: 3 },
         { name: '清一色', fan: 80 },
+        { name: '四歸二', fan: 10 },
         { name: '不求人', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(88);
+      expect(result.fanTotal).toBe(98);
     });
 
     it('scores 混一色 on a one-suit + 字牌 hand', () => {
@@ -667,6 +669,114 @@ describe('scoreHand', () => {
         { name: '門前清', fan: 3 },
       ]);
       expect(result.fanTotal).toBe(14);
+    });
+  });
+
+  describe('四歸n', () => {
+    it('scores 四歸一 — a 刻 of m2 plus one more m2 in a 順', () => {
+      // 刻 m2m2m2 | 順 m1m2m3 p1p2p3 s1s2s3 s7s8s9 | 對 p5 — win on the discarded s9.
+      const hand: Hand = {
+        concealed: [
+          'm2',
+          'm2',
+          'm2',
+          'm2',
+          'm1',
+          'm3',
+          'p1',
+          'p2',
+          'p3',
+          's1',
+          's2',
+          's3',
+          's7',
+          's8',
+          'p5',
+          'p5',
+        ],
+        winningTile: 's9',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '四歸一', fan: 5 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(8);
+    });
+
+    it('scores 四歸二 — an m5 pair plus two more m5 in 順子', () => {
+      // 對 m5 | 順 m3m4m5 m5m6m7 p1p2p3 s1s2s3 | 刻 s7 — win on the discarded s3.
+      const hand: Hand = {
+        concealed: [
+          'm5',
+          'm5',
+          'm5',
+          'm5',
+          'm3',
+          'm4',
+          'm6',
+          'm7',
+          'p1',
+          'p2',
+          'p3',
+          's1',
+          's2',
+          's7',
+          's7',
+          's7',
+        ],
+        winningTile: 's3',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '四歸二', fan: 10 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(13);
+    });
+
+    it('scores 四歸四 — every copy of m5 sitting in a different 順', () => {
+      // 順 m3m4m5 m4m5m6 m5m6m7 m5m6m7 s1s2s3 | 對 p5 — win on the discarded s3.
+      const hand: Hand = {
+        concealed: [
+          'm3',
+          'm4',
+          'm4',
+          'm5',
+          'm5',
+          'm5',
+          'm5',
+          'm6',
+          'm6',
+          'm6',
+          'm7',
+          'm7',
+          's1',
+          's2',
+          'p5',
+          'p5',
+        ],
+        winningTile: 's3',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '平糊', fan: 3 },
+        { name: '四歸四', fan: 20 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(26);
     });
   });
 

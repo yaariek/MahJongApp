@@ -1,5 +1,5 @@
 import type { PlayingTileId } from '../tiles/tiles';
-import type { FanLine, Hand, HandContext, ScoreResult } from './types';
+import type { Hand, HandContext, ScoreResult } from './types';
 import { EVALUATORS } from './evaluators';
 import { parseHand, type HandPartition } from './parse';
 
@@ -16,7 +16,10 @@ export * from './parse';
  * downgrade the first concealed set that contains it (the triplet, given canonical
  * order). Revisit with a fixture if a real hand needs the other reading.
  */
-function applyDiscardDowngrade(partition: HandPartition, winningTile: PlayingTileId): HandPartition {
+function applyDiscardDowngrade(
+  partition: HandPartition,
+  winningTile: PlayingTileId,
+): HandPartition {
   const idx = partition.sets.findIndex((s) => s.concealed && s.tiles.includes(winningTile));
   if (idx === -1) return partition;
   return {
@@ -45,12 +48,11 @@ export function scoreHand(hand: Hand, context: HandContext): ScoreResult {
 
   let best: ScoreResult = { lines: [], fanTotal: -1 };
   for (const parsed of partitions) {
-    const partition = context.selfDraw
-      ? parsed
-      : applyDiscardDowngrade(parsed, hand.winningTile);
-    const lines = EVALUATORS.map((evaluate) => evaluate(partition, context)).filter(
-      (line): line is FanLine => line !== null,
-    );
+    const partition = context.selfDraw ? parsed : applyDiscardDowngrade(parsed, hand.winningTile);
+    const lines = EVALUATORS.flatMap((evaluate) => {
+      const line = evaluate(partition, context);
+      return line == null ? [] : Array.isArray(line) ? line : [line];
+    });
     const fanTotal = lines.reduce((sum, line) => sum + line.fan, 0);
     if (fanTotal > best.fanTotal) best = { lines, fanTotal };
   }
