@@ -357,9 +357,10 @@ const louSiu: Evaluator = (p) => {
   return lines.length > 0 ? lines : null;
 };
 
-// 無字 — no 風牌 or 箭牌 anywhere in the hand.
-const mouZi: Evaluator = (p) =>
-  allTiles(p).every((t) => suitOf(t) !== null) ? { name: '無字', fan: 1 } : null;
+// 間間糊 — 自摸 + 門前 + 對對糊. Scored at 100, replacing 對對糊 + 不求人 in the
+// finalize pass (see index.ts).
+const gaanGaanWu: Evaluator = (p, ctx) =>
+  ctx.selfDraw && isConcealed(p) && allTriplets(p) ? { name: '間間糊', fan: 100 } : null;
 
 // All five sets are claimed melds (明槓 counts as "落地"; an 暗槓 does not, since
 // it was self-drawn). With five melds the only concealed tile is half the pair,
@@ -409,7 +410,7 @@ export const EVALUATORS: Evaluator[] = [
   kyutJatMun,
   zeungNgaan,
   louSiu,
-  mouZi,
+  gaanGaanWu,
   cyunKauJan,
   bunKauJan,
   munCinCing,

@@ -23,13 +23,12 @@ describe('scoreHand', () => {
     const result = scoreHand(hand, baseContext);
 
     expect(result.lines).toEqual([
-      { name: '平糊', fan: 3 },
       { name: '三相逢', fan: 10 },
       { name: '將眼', fan: 1 },
       { name: '老少', fan: 2 },
-      { name: '無字', fan: 1 },
+      { name: '大平糊', fan: 10 },
     ]);
-    expect(result.fanTotal).toBe(17);
+    expect(result.fanTotal).toBe(23);
   });
 
   it('adds the 連N拉N line while the dealer is on a streak (連2 → fan 2·2+1 = 5)', () => {
@@ -44,17 +43,16 @@ describe('scoreHand', () => {
     const result = scoreHand(hand, { ...baseContext, linZong: 2 });
 
     expect(result.lines).toEqual([
-      { name: '平糊', fan: 3 },
       { name: '三相逢', fan: 10 },
       { name: '將眼', fan: 1 },
       { name: '老少', fan: 2 },
-      { name: '無字', fan: 1 },
       { name: '連2拉2', fan: 5 },
+      { name: '大平糊', fan: 10 },
     ]);
-    expect(result.fanTotal).toBe(22);
+    expect(result.fanTotal).toBe(28);
   });
 
-  it('stacks 對對糊 + 五暗刻 + 圈風刻 + 不求人 on a concealed self-drawn all-triplet hand', () => {
+  it('collapses a concealed self-drawn all-triplet hand to 間間糊 (replacing 對對糊 + 不求人)', () => {
     // 刻 m1 p2 s3 wE s9 | 對 dR, self-draw on s9, nothing exposed → all 5 刻 are 暗.
     // wE 刻 in the E round is a 圈風刻.
     const hand: Hand = {
@@ -84,13 +82,13 @@ describe('scoreHand', () => {
     const result = scoreHand(hand, { ...baseContext, selfDraw: true });
 
     expect(result.lines).toEqual([
-      { name: '對對糊', fan: 30 },
       { name: '五暗刻', fan: 80 },
       { name: '圈風刻', fan: 2 },
       { name: '五門齊', fan: 10 },
-      { name: '不求人', fan: 5 },
+      { name: '間間糊', fan: 100 },
+      { name: '無花', fan: 1 },
     ]);
-    expect(result.fanTotal).toBe(127);
+    expect(result.fanTotal).toBe(193);
   });
 
   describe('暗刻 vs 明刻 — same tiles, different win source', () => {
@@ -108,16 +106,20 @@ describe('scoreHand', () => {
       expect(result.lines).toEqual([
         { name: '三暗刻', fan: 10 },
         { name: '自摸', fan: 1 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(11);
+      expect(result.fanTotal).toBe(12);
     });
 
     it('winning on a discarded s5 downgrades that 刻 to 明 → 三暗刻 drops to 二暗刻', () => {
       const result = scoreHand(makeHand(), baseContext);
 
       expect(result.lines.map((l) => l.name)).not.toContain('三暗刻');
-      expect(result.lines).toEqual([{ name: '二暗刻', fan: 3 }]);
-      expect(result.fanTotal).toBe(3);
+      expect(result.lines).toEqual([
+        { name: '二暗刻', fan: 3 },
+        { name: '無花', fan: 1 },
+      ]);
+      expect(result.fanTotal).toBe(4);
     });
   });
 
@@ -143,8 +145,9 @@ describe('scoreHand', () => {
         { name: '發刻', fan: 2 },
         { name: '白刻', fan: 2 },
         { name: '將眼', fan: 1 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(52);
+      expect(result.fanTotal).toBe(53);
     });
 
     it('tells 圈風刻 / 門風刻 / 客風刻 apart for the seat and round wind', () => {
@@ -167,8 +170,9 @@ describe('scoreHand', () => {
         { name: '門風刻', fan: 2 },
         { name: '客風刻', fan: 1 },
         { name: '將眼', fan: 1 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(48);
+      expect(result.fanTotal).toBe(49);
     });
   });
 
@@ -204,17 +208,16 @@ describe('scoreHand', () => {
       // Also 四歸二 (all four m9 — two in the pair, two in m7m8m9), 暗龍
       // (a concealed m1-9 straight) and 一般高 (m1m2m3 ×2).
       expect(result.lines).toEqual([
-        { name: '平糊', fan: 3 },
         { name: '清一色', fan: 80 },
         { name: '四歸二', fan: 10 },
         { name: '暗龍', fan: 20 },
         { name: '一般高', fan: 3 },
         { name: '一般高', fan: 3 },
         { name: '老少', fan: 2 },
-        { name: '無字', fan: 1 },
         { name: '不求人', fan: 5 },
+        { name: '大平糊', fan: 10 },
       ]);
-      expect(result.fanTotal).toBe(127);
+      expect(result.fanTotal).toBe(133);
     });
 
     it('scores 混一色 on a one-suit + 字牌 hand', () => {
@@ -254,8 +257,9 @@ describe('scoreHand', () => {
         { name: '中刻', fan: 2 },
         { name: '老少', fan: 2 },
         { name: '不求人', fan: 5 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(64);
+      expect(result.fanTotal).toBe(65);
     });
   });
 
@@ -276,8 +280,9 @@ describe('scoreHand', () => {
       { name: '門風刻', fan: 2 },
       { name: '將眼', fan: 1 },
       { name: '老少', fan: 2 },
+      { name: '無花', fan: 1 },
     ]);
-    expect(result.fanTotal).toBe(17);
+    expect(result.fanTotal).toBe(18);
   });
 
   describe('三元 / 四喜', () => {
@@ -318,8 +323,9 @@ describe('scoreHand', () => {
         { name: '白刻', fan: 2 },
         { name: '將眼', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(110);
+      expect(result.fanTotal).toBe(111);
     });
 
     it('scores 小三元 — two 龍牌 刻 + a 龍牌 pair', () => {
@@ -357,8 +363,9 @@ describe('scoreHand', () => {
         { name: '中刻', fan: 2 },
         { name: '發刻', fan: 2 },
         { name: '門前清', fan: 3 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(32);
+      expect(result.fanTotal).toBe(33);
     });
 
     it('scores 大四喜 (+ 對對糊 + 四暗刻) — four wind 刻', () => {
@@ -400,8 +407,9 @@ describe('scoreHand', () => {
         { name: '缺一門', fan: 5 },
         { name: '將眼', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(155);
+      expect(result.fanTotal).toBe(156);
     });
 
     it('scores 小四喜 — three wind 刻 + a wind pair', () => {
@@ -440,8 +448,9 @@ describe('scoreHand', () => {
         { name: '客風刻', fan: 1 },
         { name: '缺一門', fan: 5 },
         { name: '門前清', fan: 3 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(83);
+      expect(result.fanTotal).toBe(84);
     });
 
     it('scores 大三風 — three wind 刻 with a non-wind pair', () => {
@@ -480,8 +489,9 @@ describe('scoreHand', () => {
         { name: '客風刻', fan: 1 },
         { name: '將眼', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(69);
+      expect(result.fanTotal).toBe(70);
     });
 
     it('scores 小三風 — two wind 刻 + a wind pair', () => {
@@ -518,8 +528,9 @@ describe('scoreHand', () => {
         { name: '圈風刻', fan: 2 },
         { name: '門風刻', fan: 2 },
         { name: '門前清', fan: 3 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(25);
+      expect(result.fanTotal).toBe(26);
     });
   });
 
@@ -556,10 +567,10 @@ describe('scoreHand', () => {
         { name: '二兄弟', fan: 3 },
         { name: '三相逢', fan: 10 },
         { name: '二暗刻', fan: 3 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(20);
+      expect(result.fanTotal).toBe(24);
     });
 
     it('scores 小三兄弟 — same-rank 刻 in two suits + a same-rank pair in the third', () => {
@@ -595,10 +606,10 @@ describe('scoreHand', () => {
         { name: '三相逢', fan: 10 },
         { name: '二暗刻', fan: 3 },
         { name: '將眼', fan: 1 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(28);
+      expect(result.fanTotal).toBe(32);
     });
 
     it('scores 大三兄弟 — same-rank 刻 in all three suits', () => {
@@ -633,10 +644,10 @@ describe('scoreHand', () => {
         { name: '大三兄弟', fan: 15 },
         { name: '二相逢', fan: 2 },
         { name: '三暗刻', fan: 10 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(31);
+      expect(result.fanTotal).toBe(35);
     });
 
     it('scores 大三姊妹 — three consecutive-rank 刻 in one suit', () => {
@@ -671,10 +682,10 @@ describe('scoreHand', () => {
         { name: '大三姊妹', fan: 15 },
         { name: '二相逢', fan: 2 },
         { name: '三暗刻', fan: 10 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(31);
+      expect(result.fanTotal).toBe(35);
     });
 
     it('scores 小三姊妹 — two consecutive-rank 刻 + the pair extends the run', () => {
@@ -710,10 +721,10 @@ describe('scoreHand', () => {
         { name: '二相逢', fan: 2 },
         { name: '二暗刻', fan: 3 },
         { name: '老少', fan: 2 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(19);
+      expect(result.fanTotal).toBe(23);
     });
   });
 
@@ -751,10 +762,10 @@ describe('scoreHand', () => {
         { name: '三相逢', fan: 10 },
         { name: '將眼', fan: 1 },
         { name: '老少', fan: 2 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(22);
+      expect(result.fanTotal).toBe(26);
     });
 
     it('scores 四歸二 — an m5 pair plus two more m5 in 順子', () => {
@@ -789,10 +800,10 @@ describe('scoreHand', () => {
         { name: '四歸二', fan: 10 },
         { name: '二相逢', fan: 2 },
         { name: '將眼', fan: 1 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(17);
+      expect(result.fanTotal).toBe(21);
     });
 
     it('scores 四歸四 — every copy of m5 sitting in a different 順', () => {
@@ -825,14 +836,13 @@ describe('scoreHand', () => {
 
       // m5m6m7 appears twice → also 一般高.
       expect(result.lines).toEqual([
-        { name: '平糊', fan: 3 },
         { name: '四歸四', fan: 20 },
         { name: '一般高', fan: 3 },
         { name: '將眼', fan: 1 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '大平糊', fan: 10 },
       ]);
-      expect(result.fanTotal).toBe(31);
+      expect(result.fanTotal).toBe(37);
     });
   });
 
@@ -869,10 +879,10 @@ describe('scoreHand', () => {
         { name: '暗龍', fan: 20 },
         { name: '二相逢', fan: 2 },
         { name: '老少', fan: 2 },
-        { name: '無字', fan: 1 },
         { name: '不求人', fan: 5 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(30);
+      expect(result.fanTotal).toBe(34);
     });
 
     it('scores 明龍 — the 789 leg completed by the winning discard', () => {
@@ -907,10 +917,10 @@ describe('scoreHand', () => {
         { name: '明龍', fan: 10 },
         { name: '二相逢', fan: 2 },
         { name: '老少', fan: 2 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(18);
+      expect(result.fanTotal).toBe(22);
     });
 
     it('scores 暗雜龍 — a concealed 1-9 straight, one leg in each suit', () => {
@@ -944,10 +954,10 @@ describe('scoreHand', () => {
       expect(result.lines).toEqual([
         { name: '暗雜龍', fan: 15 },
         { name: '二暗刻', fan: 3 },
-        { name: '無字', fan: 1 },
         { name: '不求人', fan: 5 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(24);
+      expect(result.fanTotal).toBe(28);
     });
 
     it('scores 明雜龍 — cross-suit straight, 789 leg won by discard', () => {
@@ -981,10 +991,10 @@ describe('scoreHand', () => {
       expect(result.lines).toEqual([
         { name: '明雜龍', fan: 8 },
         { name: '二暗刻', fan: 3 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(15);
+      expect(result.fanTotal).toBe(19);
     });
   });
 
@@ -1023,10 +1033,10 @@ describe('scoreHand', () => {
         { name: '大三兄弟', fan: 15 },
         { name: '小三兄弟', fan: 10 },
         { name: '四暗刻', fan: 30 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(169);
+      expect(result.fanTotal).toBe(173);
     });
 
     it('scores 全帶么 — every set/pair carries a plain 1/9, with a 順', () => {
@@ -1063,10 +1073,10 @@ describe('scoreHand', () => {
         { name: '二相逢', fan: 2 },
         { name: '二相逢', fan: 2 },
         { name: '老少', fan: 2 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(25);
+      expect(result.fanTotal).toBe(29);
     });
 
     it('scores 全帶混么 — every set/pair carries a 1/9 or 字牌, with a 順 and 字牌', () => {
@@ -1104,8 +1114,9 @@ describe('scoreHand', () => {
         { name: '中刻', fan: 2 },
         { name: '五門齊', fan: 10 },
         { name: '門前清', fan: 3 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(37);
+      expect(result.fanTotal).toBe(38);
     });
 
     it('scores 混么 — every tile is a 1/9 or 字牌, no 順 (混幺九)', () => {
@@ -1146,8 +1157,9 @@ describe('scoreHand', () => {
         { name: '中刻', fan: 2 },
         { name: '缺一門', fan: 5 },
         { name: '門前清', fan: 3 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(105);
+      expect(result.fanTotal).toBe(106);
     });
   });
 
@@ -1176,8 +1188,9 @@ describe('scoreHand', () => {
         { name: '五門齊', fan: 10 },
         { name: '將眼', fan: 1 },
         { name: '全求人', fan: 15 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(30);
+      expect(result.fanTotal).toBe(31);
     });
 
     it('scores 半求人 — 單釣 self-drawn (+ 自摸)', () => {
@@ -1197,8 +1210,9 @@ describe('scoreHand', () => {
         { name: '將眼', fan: 1 },
         { name: '半求人', fan: 8 },
         { name: '自摸', fan: 1 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(24);
+      expect(result.fanTotal).toBe(25);
     });
   });
 
@@ -1234,10 +1248,10 @@ describe('scoreHand', () => {
       expect(result.lines).toEqual([
         { name: '將眼', fan: 1 },
         { name: '老少', fan: 2 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(7);
+      expect(result.fanTotal).toBe(11);
     });
 
     it('drops 無字 as soon as any 字牌 is in the hand', () => {
@@ -1274,8 +1288,9 @@ describe('scoreHand', () => {
         { name: '將眼', fan: 1 },
         { name: '老少', fan: 2 },
         { name: '門前清', fan: 3 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(8);
+      expect(result.fanTotal).toBe(9);
     });
   });
 
@@ -1312,10 +1327,10 @@ describe('scoreHand', () => {
         { name: '一般高', fan: 3 },
         { name: '二相逢', fan: 2 },
         { name: '將眼', fan: 1 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(10);
+      expect(result.fanTotal).toBe(14);
     });
 
     it('scores 三般高 — three identical 順 in one suit (melds force the 順 reading)', () => {
@@ -1332,9 +1347,9 @@ describe('scoreHand', () => {
       expect(result.lines).toEqual([
         { name: '三般高', fan: 15 },
         { name: '將眼', fan: 1 },
-        { name: '無字', fan: 1 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(17);
+      expect(result.fanTotal).toBe(21);
     });
 
     it('scores 四般高 — four identical 順 in one suit (two melds + two concealed)', () => {
@@ -1354,9 +1369,9 @@ describe('scoreHand', () => {
       expect(result.lines).toEqual([
         { name: '四般高', fan: 30 },
         { name: '將眼', fan: 1 },
-        { name: '無字', fan: 1 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(32);
+      expect(result.fanTotal).toBe(36);
     });
 
     it('scores 二相逢 — the same 順 rank in two suits', () => {
@@ -1391,10 +1406,10 @@ describe('scoreHand', () => {
         { name: '二相逢', fan: 2 },
         { name: '將眼', fan: 1 },
         { name: '老少', fan: 2 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(9);
+      expect(result.fanTotal).toBe(13);
     });
 
     it('scores 三相逢 (三色同順) — the same 順 rank in all three suits', () => {
@@ -1428,10 +1443,10 @@ describe('scoreHand', () => {
       expect(result.lines).toEqual([
         { name: '三相逢', fan: 10 },
         { name: '二暗刻', fan: 3 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(17);
+      expect(result.fanTotal).toBe(21);
     });
 
     it('scores 四同順 — four 順 of one rank across suits, superseding 般高/相逢', () => {
@@ -1465,10 +1480,10 @@ describe('scoreHand', () => {
       expect(result.lines).toEqual([
         { name: '四同順', fan: 20 },
         { name: '將眼', fan: 1 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(25);
+      expect(result.fanTotal).toBe(29);
     });
   });
 
@@ -1510,8 +1525,9 @@ describe('scoreHand', () => {
         { name: '五門齊', fan: 10 },
         { name: '將眼', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無花', fan: 1 },
       ]);
-      expect(result.fanTotal).toBe(30);
+      expect(result.fanTotal).toBe(31);
     });
 
     it('scores 缺一門 — exactly one of 萬/筒/條 missing', () => {
@@ -1546,10 +1562,107 @@ describe('scoreHand', () => {
         { name: '二暗刻', fan: 3 },
         { name: '缺一門', fan: 5 },
         { name: '將眼', fan: 1 },
-        { name: '無字', fan: 1 },
         { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
       ]);
-      expect(result.fanTotal).toBe(13);
+      expect(result.fanTotal).toBe(17);
+    });
+  });
+
+  describe('花 + the 無字/無花/無字花/大平糊 ladder', () => {
+    it('scores 正花 (seat number) and 爛花 (other numbers), one line per flower', () => {
+      // South seat = flower #2. 刻 m1 p2 s3 wS dR | 對 m5 — win on the discarded m1.
+      const hand: Hand = {
+        concealed: [
+          'm1',
+          'm1',
+          'p2',
+          'p2',
+          'p2',
+          's3',
+          's3',
+          's3',
+          'wS',
+          'wS',
+          'wS',
+          'dR',
+          'dR',
+          'dR',
+          'm5',
+          'm5',
+        ],
+        winningTile: 'm1',
+        melds: [],
+        flowers: ['hp2', 'hp1', 'hs3'],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '對對糊', fan: 30 },
+        { name: '四暗刻', fan: 30 },
+        { name: '門風刻', fan: 2 },
+        { name: '中刻', fan: 2 },
+        { name: '五門齊', fan: 10 },
+        { name: '將眼', fan: 1 },
+        { name: '門前清', fan: 3 },
+        { name: '正花', fan: 2 },
+        { name: '爛花', fan: 1 },
+        { name: '爛花', fan: 1 },
+      ]);
+      expect(result.fanTotal).toBe(82);
+    });
+
+    it('scores 無字花 (5) on a no-字 no-花 hand that is not a 平糊', () => {
+      // 刻 m1 p2 s3 m5 s7 | 對 p9 — win on the discarded m1, nothing exposed.
+      const hand: Hand = {
+        concealed: [
+          'm1',
+          'm1',
+          'p2',
+          'p2',
+          'p2',
+          's3',
+          's3',
+          's3',
+          'm5',
+          'm5',
+          'm5',
+          's7',
+          's7',
+          's7',
+          'p9',
+          'p9',
+        ],
+        winningTile: 'm1',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '對對糊', fan: 30 },
+        { name: '四暗刻', fan: 30 },
+        { name: '門前清', fan: 3 },
+        { name: '無字花', fan: 5 },
+      ]);
+      expect(result.fanTotal).toBe(68);
+    });
+
+    it('collapses to 雞糊 (10) when the only line would be 無花 (1)', () => {
+      // 吃 m1m2m3 | 順 p2p3p4 s4s5s6 p6p7p8 | 刻 m7 | 對 wN — win on the discarded m7.
+      const hand: Hand = {
+        concealed: ['p2', 'p3', 'p4', 's4', 's5', 's6', 'p6', 'p7', 'p8', 'm7', 'm7', 'wN', 'wN'],
+        winningTile: 'm7',
+        melds: [{ kind: 'chi', tiles: ['m1', 'm2', 'm3'] }],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([{ name: '雞糊', fan: 10 }]);
+      expect(result.fanTotal).toBe(10);
     });
   });
 
