@@ -988,7 +988,7 @@ describe('scoreHand', () => {
     });
   });
 
-  describe('帶么九 — 清么 / 全帶么 / 混么', () => {
+  describe('帶么九 — 清么 / 混么 / 全帶么 / 全帶混么', () => {
     it('scores 清么 — every set a 刻 of a terminal, no 字牌 (all six 老頭 groups → 兄弟)', () => {
       // 刻 m1 m9 p1 p9 s1 | 對 s9 — win on the discarded 3rd s1.
       const hand: Hand = {
@@ -1069,7 +1069,7 @@ describe('scoreHand', () => {
       expect(result.fanTotal).toBe(25);
     });
 
-    it('scores 混么 — every set/pair carries a 1/9 or 字牌, with a 順 and 字牌', () => {
+    it('scores 全帶混么 — every set/pair carries a 1/9 or 字牌, with a 順 and 字牌', () => {
       // 順 m1m2m3 p7p8p9 | 刻 s1 dR wE | 對 s9 — win on the discarded m3.
       const hand: Hand = {
         concealed: [
@@ -1098,14 +1098,107 @@ describe('scoreHand', () => {
       const result = scoreHand(hand, baseContext);
 
       expect(result.lines).toEqual([
-        { name: '混么', fan: 30 },
+        { name: '全帶混么', fan: 10 },
         { name: '三暗刻', fan: 10 },
         { name: '圈風刻', fan: 2 },
         { name: '中刻', fan: 2 },
         { name: '五門齊', fan: 10 },
         { name: '門前清', fan: 3 },
       ]);
-      expect(result.fanTotal).toBe(57);
+      expect(result.fanTotal).toBe(37);
+    });
+
+    it('scores 混么 — every tile is a 1/9 or 字牌, no 順 (混幺九)', () => {
+      // 刻 m1 m9 s9 dR wE | 對 s1 — win on the discarded m1, so that 刻 is 明.
+      const hand: Hand = {
+        concealed: [
+          'm1',
+          'm1',
+          'm9',
+          'm9',
+          'm9',
+          's9',
+          's9',
+          's9',
+          'dR',
+          'dR',
+          'dR',
+          'wE',
+          'wE',
+          'wE',
+          's1',
+          's1',
+        ],
+        winningTile: 'm1',
+        melds: [],
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      // m9 刻 + s9 刻 (rank 9, two suits) is also a 二兄弟.
+      expect(result.lines).toEqual([
+        { name: '對對糊', fan: 30 },
+        { name: '混么', fan: 30 },
+        { name: '二兄弟', fan: 3 },
+        { name: '四暗刻', fan: 30 },
+        { name: '圈風刻', fan: 2 },
+        { name: '中刻', fan: 2 },
+        { name: '缺一門', fan: 5 },
+        { name: '門前清', fan: 3 },
+      ]);
+      expect(result.fanTotal).toBe(105);
+    });
+  });
+
+  describe('全求人 / 半求人 — every set claimed, 單釣', () => {
+    const fiveMelds = (): Hand['melds'] => [
+      { kind: 'chi', tiles: ['m1', 'm2', 'm3'] },
+      { kind: 'chi', tiles: ['p4', 'p5', 'p6'] },
+      { kind: 'pon', tiles: ['s5', 's5', 's5'] },
+      { kind: 'pon', tiles: ['wE', 'wE', 'wE'] },
+      { kind: 'pon', tiles: ['dR', 'dR', 'dR'] },
+    ];
+
+    it('scores 全求人 — 單釣 won on a discard', () => {
+      const hand: Hand = {
+        concealed: ['p8'],
+        winningTile: 'p8',
+        melds: fiveMelds(),
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, baseContext);
+
+      expect(result.lines).toEqual([
+        { name: '圈風刻', fan: 2 },
+        { name: '中刻', fan: 2 },
+        { name: '五門齊', fan: 10 },
+        { name: '將眼', fan: 1 },
+        { name: '全求人', fan: 15 },
+      ]);
+      expect(result.fanTotal).toBe(30);
+    });
+
+    it('scores 半求人 — 單釣 self-drawn (+ 自摸)', () => {
+      const hand: Hand = {
+        concealed: ['p8'],
+        winningTile: 'p8',
+        melds: fiveMelds(),
+        flowers: [],
+      };
+
+      const result = scoreHand(hand, { ...baseContext, selfDraw: true });
+
+      expect(result.lines).toEqual([
+        { name: '圈風刻', fan: 2 },
+        { name: '中刻', fan: 2 },
+        { name: '五門齊', fan: 10 },
+        { name: '將眼', fan: 1 },
+        { name: '半求人', fan: 8 },
+        { name: '自摸', fan: 1 },
+      ]);
+      expect(result.fanTotal).toBe(24);
     });
   });
 

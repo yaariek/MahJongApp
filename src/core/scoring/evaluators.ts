@@ -72,10 +72,11 @@ const wuJatSik: Evaluator = (p) => {
 const isTerminal = (t: PlayingTileId) => rankOf(t) === 1 || rankOf(t) === 9;
 const isTerminalOrHonor = (t: PlayingTileId) => rankOf(t) === null || isTerminal(t);
 
-// 帶么九 — every set and the pair carries a 1/9 or a 字牌.
-//   清么 20→80: every set a 刻/槓 of a terminal, no 字, no 順.
-//   全帶么 15: every set/pair carries a plain terminal, no 字, at least one 順.
-//   混么 30: same but 字牌 are involved, at least one 順.
+// 帶么九 — every set + the pair involves a 1/9 or a 字牌.
+//   清么 80    — the whole hand is nothing but 1/9 (no 字, so no 順).
+//   混么 30    — the whole hand is nothing but 1/9 and 字牌 (so no 順).
+//   全帶么 15  — every group carries a plain 1/9 (no 字), and a 順 is present.
+//   全帶混么 10 — every group carries a 1/9 or 字, a 順 is present, and 字 appear.
 const wanJiu: Evaluator = (p) => {
   const everyGroupQualifies =
     p.sets.every((s) => s.tiles.some(isTerminalOrHonor)) && p.pair.tiles.some(isTerminalOrHonor);
@@ -83,11 +84,13 @@ const wanJiu: Evaluator = (p) => {
 
   const tiles = allTiles(p);
   const anyHonor = tiles.some((t) => rankOf(t) === null);
-  const anySequence = p.sets.some((s) => s.kind === 'chi');
 
-  if (!anyHonor && !anySequence && tiles.every(isTerminal)) return { name: '清么', fan: 80 };
-  if (!anySequence) return null;
-  return anyHonor ? { name: '混么', fan: 30 } : { name: '全帶么', fan: 15 };
+  // 清么 / 混么 — no middle tiles at all (implies 對對糊-shaped, no 順).
+  if (tiles.every(isTerminalOrHonor)) {
+    return anyHonor ? { name: '混么', fan: 30 } : { name: '清么', fan: 80 };
+  }
+  // 全帶么 / 全帶混么 — a 順 is present but every group still carries a 幺九 / 字.
+  return anyHonor ? { name: '全帶混么', fan: 10 } : { name: '全帶么', fan: 15 };
 };
 
 // 三元 — 小三元: two 龍牌 刻/槓 + the pair is the third 龍. 大三元: all three as 刻.
@@ -358,6 +361,20 @@ const louSiu: Evaluator = (p) => {
 const mouZi: Evaluator = (p) =>
   allTiles(p).every((t) => suitOf(t) !== null) ? { name: '無字', fan: 1 } : null;
 
+// All five sets are claimed melds (明槓 counts as "落地"; an 暗槓 does not, since
+// it was self-drawn). With five melds the only concealed tile is half the pair,
+// so the wait is necessarily 單釣.
+const allSetsClaimed = (p: HandPartition) =>
+  p.melds.length === 5 && p.melds.every((m) => !(m.kind === 'kan' && m.concealed === true));
+
+// 全求人 — every set claimed, 單釣 won on a discard.
+const cyunKauJan: Evaluator = (p, ctx) =>
+  allSetsClaimed(p) && !ctx.selfDraw ? { name: '全求人', fan: 15 } : null;
+
+// 半求人 — every set claimed, 單釣 self-drawn.
+const bunKauJan: Evaluator = (p, ctx) =>
+  allSetsClaimed(p) && ctx.selfDraw ? { name: '半求人', fan: 8 } : null;
+
 // 門前清 — fully concealed, won on a discard
 const munCinCing: Evaluator = (p, ctx) =>
   isConcealed(p) && !ctx.selfDraw ? { name: '門前清', fan: 3 } : null;
@@ -393,6 +410,8 @@ export const EVALUATORS: Evaluator[] = [
   zeungNgaan,
   louSiu,
   mouZi,
+  cyunKauJan,
+  bunKauJan,
   munCinCing,
   batKauJan,
   ziMo,
