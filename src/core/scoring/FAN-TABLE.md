@@ -104,11 +104,10 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
 2. **雞糊** — "胡出時（不計莊前）只得一番": the hand's own patterns total exactly
    **1 番** (excluding 連莊/拉莊). Such a hand scores 雞糊 = 10, **replacing** that
    1 番. (Not yet implemented — needs a finalize pass in `scoreHand`.)
-3. **正花** — flower number == seat number (E=1, S=2, W=3, N=4), matched
-   separately for the plant set and the season set, **2 番 per matching flower**.
-   **爛花** — a flower whose number is not the seat's, **1 番 each**. **無花** —
-   held zero flowers. (Not yet implemented — needs `hand.flowers` + seat number
-   threaded into scoring; evaluators currently only see the partition.)
+3. **正花** — flower number == seat number (seatWind E/S/W/N → 1/2/3/4), matched
+   separately for the plant set (hp1-4) and the season set (hs1-4), **2 番 per
+   matching flower**. **爛花** — a flower whose number is not the seat's, **1 番
+   each**. (Seat number comes from `HandContext.seatWind`, already present.)
 4. **兄弟** — two 刻子 of the same number in different suits (二兄弟 3).
    **小三兄弟** — 二兄弟 plus the pair is that same number in the third suit (10).
    **大三兄弟** — the same number as a 刻 in all three suits (15).
@@ -132,9 +131,16 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
    **全帶混么** — 每一組合都有么九或番子 (every set + pair carries a 1/9 or 字牌,
    with a 順) = 10. So 混么 30 (no 順) > 全帶混么 10 (with 順) > … and the pure
    versions 清么 80 / 全帶么 15 sit alongside. (Implemented.)
-9. **無字花** — no 字牌 and no 花 = 5. **大平糊** ("無字花平大平糊" row) — 平糊
-   with no 字牌 and no 花 = 10. _Open: do these stack on top of their components
-   (平糊 3 + 無字 1 + 無花 1 + 無字花 5 + 大平糊 10) or replace? Blocked on 花
-   plumbing regardless._
+9. **無字 / 無花 / 無字花 / 大平糊 — one mutually-exclusive ladder, top tier only:**
+   - **大平糊 10** — 平糊 + no 字牌 + no 花. Counted _instead of_ 平糊 (3) and
+     instead of 無字花.
+   - **無字花 5** — no 字牌 + no 花, hand is not a 平糊. Instead of 無字 + 無花.
+   - **無字 1** — no 字牌 (but holds ≥1 花).
+   - **無花 1** — no 花 (but holds ≥1 字牌).
 
-Still to confirm: replace-vs-stack for 無字花 / 大平糊 (item 9).
+   So the current standalone `mouZi` (無字 1) evaluator must be folded into this
+   ladder, which also needs `hand.flowers`. (Blocked on 花 plumbing.)
+
+Still to confirm: do 正花 / 爛花 stack with 一台花 (10, all 4 of one set) / 兩台花
+(30, all 8)? i.e. all 8 flowers — is that 兩台花 30 alone, or 兩台花 + 2 正花 +
+6 爛花?
