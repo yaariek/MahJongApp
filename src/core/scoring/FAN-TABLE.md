@@ -87,8 +87,8 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
 | 十六不搭 (九唔搭)                                  |  40 | special hand                                                  |
 | 間間糊                                             | 100 | ready (needs definition confirmed)                            |
 | 嚦咕嚦咕                                           |  40 | special hand                                                  |
-| 一台花 (4 plants or 4 seasons)                     |  10 | ready                                                         |
-| 兩台花 (4 plants and 4 seasons)                    |  30 | ready                                                         |
+| 一台花 (4 plants or 4 seasons)                     |  10 | NOT a 番 — immediate payout during play (game flow, later)    |
+| 兩台花 / 花糊 (all 8 flowers)                      |  30 | NOT a 番 — special win-by-flowers (game flow, later)          |
 | 混么 (whole hand only 1/9 + 字, no 順)             |  30 | done                                                          |
 | 全帶混么 (every group carries 1/9 or 字, has 順)   |  10 | done                                                          |
 | 全帶么                                             |  15 | done                                                          |
@@ -141,6 +141,7 @@ Terms are the user's own (HK-Taiwanese: 胡/糊 both appear in the wild — code
    So the current standalone `mouZi` (無字 1) evaluator must be folded into this
    ladder, which also needs `hand.flowers`. (Blocked on 花 plumbing.)
 
-Still to confirm: do 正花 / 爛花 stack with 一台花 (10, all 4 of one set) / 兩台花
-(30, all 8)? i.e. all 8 flowers — is that 兩台花 30 alone, or 兩台花 + 2 正花 +
-6 爛花?
+**一台花 / 兩台花 / 花糊 are NOT hand 番** — 一台花 (all 4 of one flower set) is an
+immediate payout the moment it happens during play; all 8 flowers is 花糊, a
+special way to win outright. Both belong in game-flow / settlement code, not the
+`scoreHand` evaluator. Only 無花 / 正花 / 爛花 are hand-scoring flower lines.
