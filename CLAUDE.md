@@ -72,6 +72,8 @@ npm run format       # prettier --write .
 - Every settlement fixture asserts the `Transfer[]` and that net-by-seat sums to 0.
 - Keep `src/core` import-clean — if you need a UUID or the clock, pass it in as
   an argument rather than importing a device API.
+- Config goes in `.env.local` (git-ignored; template in `.env.example`). `EXPO_PUBLIC_*`
+  values ship inside the app bundle — never put secrets there or in git.
 - Prettier owns formatting (single quotes, 100 cols, trailing commas). Don't
   fight it in ESLint.
 

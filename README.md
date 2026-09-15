@@ -37,6 +37,12 @@ npm start          # Expo dev server — scan the QR code with Expo Go
 
 If your phone can't reach the dev server, use `npm start -- --tunnel`.
 
+### Environment variables
+
+Copy `.env.example` to `.env.local` (git-ignored). Only `EXPO_PUBLIC_*` variables reach
+the app, and they are **visible to anyone with the app** — API secrets live on the server
+proxy, never here.
+
 ## Commands
 
 | Command                                   | What it does                    |
@@ -65,3 +71,8 @@ whole scoring engine is unit-tested with Vitest and could run on a server later.
 Each losing player pays **`底 + 番總`** (× optional `番底`, default 1), where `番總` =
 hand 番 + any 連莊/拉莊 番. No HK doubling. House rules (放銃一家付, 莊家加倍, 花槓,
 詐胡 penalties, draw-keeps-dealer, rounds per game) are configurable.
+
+## License
+
+Copyright © 2026 Keira Au Yeung. All rights reserved — source is visible for reference
+only; see [LICENSE](LICENSE).
