@@ -1,12 +1,14 @@
-@AGENTS.md
-
 # MahJongApp
 
 A mobile app for **HK-flavoured Taiwanese mahjong**: photograph a winning hand
 (食糊) and auto-compute the 番, track seats and dealer/round rotation, and settle
 who pays whom.
 
-Full design + phased roadmap: `.claude/plans/so-i-have-resilient-umbrella.md`.
+Full design + phased roadmap: `~/.claude/plans/so-i-have-resilient-umbrella.md`
+(user-level, not in the repo). Current phase is tracked in `README.md`.
+
+> **Expo has changed.** Read the exact versioned docs at
+> https://docs.expo.dev/versions/v57.0.0/ before writing any Expo / RN code.
 
 ## Stack
 
@@ -30,17 +32,17 @@ with no simulator and so it could move to a server later. `src/lib` follows the
 same no-framework rule so it is unit-tested too. Vitest (`vitest.config.mts`)
 looks at `src/core/**/*.test.ts` and `src/lib/**/*.test.ts`.
 
-The first screen (`src/app/index.tsx`, the manual 計番 Scoring Calculator) now
+The first screen (`src/app/index.tsx`, the manual 計番 Scoring Calculator)
 consumes `core/scoring` + `core/tiles` via `src/lib`.
 
 ### `src/core` modules
 
-| Module                       | Status       | Purpose                                                                                                                                                                                                             |
-| ---------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `core/tiles`                 | done         | The 42 Taiwanese tile faces (`m1`..`s9`, `wE`..`dW`, `hp1`..`hs4`) + helpers.                                                                                                                                       |
-| `core/game-state`            | done         | `seatWind`, `nextRotation` — dealer/round-wind/連莊 state machine. Pure.                                                                                                                                            |
-| `core/scoring/settlement`    | done         | `底 + 番總 × 番底` → `Transfer[]` (放銃一家付 / 自摸 / split).                                                                                                                                                      |
-| `core/scoring` (`scoreHand`) | **skeleton** | `parse.ts` (all 5-sets+pair layouts, each set tagged 暗/明) → `scoreHand` won-by-discard downgrade → `evaluators.ts` (7 patterns incl. 三/四/五暗刻, **placeholder 番**) → max-scoring partition. Grow per fixture. |
+| Module                       | Status      | Purpose                                                                                                                                                                                                |
+| ---------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `core/tiles`                 | done        | The 42 Taiwanese tile faces (`m1`..`s9`, `wE`..`dW`, `hp1`..`hs4`) + helpers.                                                                                                                          |
+| `core/game-state`            | done        | `seatWind`, `nextRotation` — dealer/round-wind/連莊 state machine. Pure. Draw passes the dealer by default (摸和過莊).                                                                                 |
+| `core/scoring/settlement`    | done        | `底 + 番總 × 番底` → `Transfer[]` (放銃一家付 / 自摸 / split).                                                                                                                                         |
+| `core/scoring` (`scoreHand`) | in progress | `parse.ts` (all 5-sets+pair layouts, each set tagged 暗/明) → won-by-discard downgrade → `evaluators.ts` (house 番 from `FAN-TABLE.md`) → max-scoring partition. Add evaluators per confirmed fixture. |
 
 ## Scoring model (decided — do not change without asking)
 
@@ -73,8 +75,9 @@ npm run format       # prettier --write .
 - Prettier owns formatting (single quotes, 100 cols, trailing commas). Don't
   fight it in ESLint.
 
+## Workflow
 
-## Others
-
-Make a git commit after every change for easier code management.
-Write of update related testing after every changes, and make sure all the test and verification has passed before handing the finished task to user.
+- Make a git commit after every change for easier code management.
+- Write or update related tests after every change, and make sure all tests and
+  verification (`npm test`, `npm run typecheck`, `npm run lint`) pass before
+  handing the finished task to the user.

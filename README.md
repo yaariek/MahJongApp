@@ -1,56 +1,67 @@
-# Welcome to your Expo app 👋
+# MahJongApp 🀄
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A mobile app for **HK-flavoured Taiwanese mahjong** (16-tile, additive 番 scoring):
+enter — and later photograph — a winning hand (食糊), auto-compute the 番, track
+seats and dealer/round rotation, and settle who pays whom.
 
-## Get started
+## Current phase: Phase 1 — Manual calculator + seat tracker 🚧
 
-1. Install dependencies
+| Phase | Scope                                                                     | Status          |
+| ----- | ------------------------------------------------------------------------- | --------------- |
+| 0     | Setup: Expo SDK 57, TypeScript, Vitest, ESLint/Prettier, Drizzle          | ✅ done         |
+| **1** | **Tile-picker calculator, seat/rotation tracker, settlement, 找數 sheet** | **in progress** |
+| 2     | Photo scoring via a vision-model (VLM) proxy                              | planned         |
+| 3     | On-device tile recognition (YOLO detector + CNN classifier)               | planned         |
+| 4     | Cloud sync & accounts (Supabase)                                          | planned         |
+| 5     | Tutorial + searchable 番 table                                            | planned         |
 
-   ```bash
-   npm install
-   ```
+### Phase 1 progress
 
-2. Start the app
+- [x] Tile vocabulary — 42 faces incl. flowers (`src/core/tiles`)
+- [x] Hand parser — every 5 sets + pair layout, 暗/明 aware (`src/core/scoring/parse.ts`)
+- [x] Pattern evaluators for the house 番 table ([`FAN-TABLE.md`](src/core/scoring/FAN-TABLE.md))
+- [x] Settlement — `底 + 番總 × 番底` → who pays whom (`src/core/scoring/settlement.ts`)
+- [x] Dealer / round-wind / 連莊 rotation state machine (`src/core/game-state`)
+- [x] Manual 計番 scoring calculator screen (`src/app/index.tsx`)
+- [ ] Game screen — 4 seats, record-hand flow, running balances
+- [ ] SQLite persistence (Drizzle) + game history
+- [ ] End-of-game 找數 summary with "已找 / mark paid" tracking
+- [ ] Optional "attach photo" on record-hand (seeds the Phase 3 training set)
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Getting started
 
 ```bash
-npm run reset-project
+npm install
+npm start          # Expo dev server — scan the QR code with Expo Go
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+If your phone can't reach the dev server, use `npm start -- --tunnel`.
 
-### Other setup steps
+## Commands
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+| Command                                   | What it does                    |
+| ----------------------------------------- | ------------------------------- |
+| `npm start`                               | Expo dev server                 |
+| `npm test` / `npm run test:watch`         | Vitest — `src/core` + `src/lib` |
+| `npm run typecheck`                       | `tsc --noEmit`                  |
+| `npm run lint`                            | ESLint (`eslint-config-expo`)   |
+| `npm run format` / `npm run format:check` | Prettier                        |
 
-## Learn more
+## Project layout
 
-To learn more about developing your project with Expo, look at the following resources:
+```
+src/core/        pure TypeScript domain logic — tiles, scoring, game-state (no React/Expo)
+src/lib/         framework-free helpers bridging core ↔ UI (draft state, hand builder, glyphs)
+src/app/         screens (Expo Router file routes)
+src/components/  UI building blocks (scoring/ holds the calculator widgets)
+src/hooks/, src/constants/
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+`src/core` and `src/lib` must never import React, React Native or `expo-*`, so the
+whole scoring engine is unit-tested with Vitest and could run on a server later.
 
-## Join the community
+## Scoring model
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Each losing player pays **`底 + 番總`** (× optional `番底`, default 1), where `番總` =
+hand 番 + any 連莊/拉莊 番. No HK doubling. House rules (放銃一家付, 莊家加倍, 花槓,
+詐胡 penalties, draw-keeps-dealer, rounds per game) are configurable.
