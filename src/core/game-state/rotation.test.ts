@@ -22,8 +22,14 @@ describe('nextRotation', () => {
     expect(s.handNumber).toBe(2);
   });
 
-  it('keeps the dealer on a 荒莊 by default', () => {
+  it('passes the dealer on a 摸和 (荒莊) by default — 摸和過莊', () => {
     const s = nextRotation(initialRotation(), { type: 'draw' });
+    expect(s.dealerSeat).toBe(1);
+    expect(s.linZong).toBe(0);
+  });
+
+  it('keeps the dealer on a 荒莊 when drawKeepsDealer is set', () => {
+    const s = nextRotation(initialRotation(), { type: 'draw' }, { drawKeepsDealer: true });
     expect(s.dealerSeat).toBe(0);
     expect(s.linZong).toBe(1);
   });

@@ -41,7 +41,8 @@ export type HandResult =
 export interface RotationConfig {
   dealerSeat?: number;
   totalRounds?: number;
-  /** Does a 荒莊 keep the dealer in place? True in most house rules. */
+  /** Does a 荒莊 (摸和) keep the dealer in place? Defaults to false — this
+   *  play group's rule is 摸和過莊 (the dealer passes on a draw). */
   drawKeepsDealer?: boolean;
 }
 
@@ -73,7 +74,7 @@ export function nextRotation(
 ): RotationState {
   if (state.finished) return state;
 
-  const drawKeepsDealer = config.drawKeepsDealer ?? true;
+  const drawKeepsDealer = config.drawKeepsDealer ?? false;
   const dealerKeeps = result.type === 'dealerWin' || (result.type === 'draw' && drawKeepsDealer);
 
   if (dealerKeeps) {
